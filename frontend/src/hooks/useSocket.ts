@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 
 import socket from "../services/socket";
-import type { ConnectionStatus } from "../types/collaboration";
+import type { BoardJoinedPayload, ConnectionStatus, HostChangedPayload } from "../types/collaboration";
 
-export const BOARD_ID = "board-1";
 const USER_NAME_STORAGE_KEY = "collab-board:user-name";
 
 const getStoredUserName = () => {
@@ -22,19 +21,25 @@ const getStoredUserName = () => {
   return generatedName;
 };
 
-export const useSocket = () => {
+export const useSocket = (boardId?: string) => {
   const [status, setStatus] = useState<ConnectionStatus>(
     socket.connected ? "connected" : "disconnected",
   );
   const [userName] = useState(getStoredUserName);
+  const [isHost, setIsHost] = useState(false);
+  const [hostSocketId, setHostSocketId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!boardId) {
+      return;
+    }
+
     const handleConnect = () => {
       setStatus("connected");
       console.log("Connected");
 
       socket.emit("board:join", {
-        boardId: BOARD_ID,
+        boardId,
         name: userName,
       });
     };
@@ -56,8 +61,15 @@ export const useSocket = () => {
       setStatus("disconnected");
     };
 
-    const handleBoardJoined = (data: unknown) => {
+    const handleBoardJoined = (data: BoardJoinedPayload) => {
       console.log("Joined board", data);
+      setIsHost(Boolean(data.isHost));
+      setHostSocketId(data.hostSocketId ?? null);
+    };
+
+    const handleHostChanged = (data: HostChangedPayload) => {
+      setHostSocketId(data.hostSocketId);
+      setIsHost(data.hostSocketId === socket.id);
     };
 
     const handleUserJoined = (data: unknown) => {
@@ -71,6 +83,7 @@ export const useSocket = () => {
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("board:joined", handleBoardJoined);
+    socket.on("host:changed", handleHostChanged);
     socket.on("board:user-joined", handleUserJoined);
     socket.on("board:error", handleBoardError);
     socket.io.on("reconnect_attempt", handleReconnectAttempt);
@@ -84,6 +97,7 @@ export const useSocket = () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("board:joined", handleBoardJoined);
+      socket.off("host:changed", handleHostChanged);
       socket.off("board:user-joined", handleUserJoined);
       socket.off("board:error", handleBoardError);
       socket.io.off("reconnect_attempt", handleReconnectAttempt);
@@ -92,12 +106,16 @@ export const useSocket = () => {
       socket.io.off("reconnect_failed", handleReconnectFailed);
 
       socket.disconnect();
+      setIsHost(false);
+      setHostSocketId(null);
     };
-  }, [userName]);
+  }, [userName, boardId]);
 
   return {
     socket,
     status,
     userName,
+    isHost,
+    hostSocketId,
   };
 };

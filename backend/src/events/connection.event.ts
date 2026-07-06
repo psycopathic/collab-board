@@ -36,6 +36,14 @@ export const registerConnectionEvents = (socket: Socket) => {
         boardId: removal.user.boardId,
         isDrawing: false,
       });
+
+      if (removal.newHost) {
+        socket.nsp.to(removal.user.boardId).emit(SOCKET_EVENTS.HOST_CHANGED, {
+          boardId: removal.user.boardId,
+          hostSocketId: removal.newHost.socketId,
+          hostName: removal.newHost.name,
+        });
+      }
     }
 
     console.log(`Disconnected: ${socket.id}`);

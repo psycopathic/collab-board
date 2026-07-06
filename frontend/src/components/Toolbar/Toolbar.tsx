@@ -10,6 +10,7 @@ interface ToolbarProps {
   activeTool: Tool;
   showGrid: boolean;
   zoomPercent: number;
+  isHost: boolean;
   onColorChange: (color: string) => void;
   onBrushWidthChange: (width: number) => void;
   onClear: () => void;
@@ -18,6 +19,7 @@ interface ToolbarProps {
   onZoomOut: () => void;
   onResetView: () => void;
   onToggleGrid: () => void;
+  onEndRoom: () => void;
 }
 
 const TOOLS: Array<{ value: Tool; label: string }> = [
@@ -38,6 +40,7 @@ const Toolbar = ({
   activeTool,
   showGrid,
   zoomPercent,
+  isHost,
   onColorChange,
   onBrushWidthChange,
   onClear,
@@ -46,6 +49,7 @@ const Toolbar = ({
   onZoomOut,
   onResetView,
   onToggleGrid,
+  onEndRoom,
 }: ToolbarProps) => {
   const statusClassName =
     connectionStatus === "connected"
@@ -133,14 +137,37 @@ const Toolbar = ({
 
       <div className="toolbar__section toolbar__section--meta">
         <div className="toolbar__field">
-          <span className="toolbar__label">Board ID</span>
-          <strong className="toolbar__text">{boardId}</strong>
+          <span className="toolbar__label">Room Code</span>
+          <button
+            type="button"
+            className="toolbar__room-code"
+            onClick={() => {
+              navigator.clipboard?.writeText(boardId);
+            }}
+            title="Click to copy"
+          >
+            {boardId}
+          </button>
         </div>
 
         <div className="toolbar__field">
           <span className="toolbar__label">Status</span>
           <strong className={statusClassName}>{statusLabel}</strong>
         </div>
+
+        {isHost && (
+          <button
+            type="button"
+            className="toolbar__end-room"
+            onClick={() => {
+              if (window.confirm("End the room for everyone?")) {
+                onEndRoom();
+              }
+            }}
+          >
+            End Room
+          </button>
+        )}
       </div>
     </header>
   );

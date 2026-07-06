@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import Cursor from "../Cursor/Cursor";
 import Notification from "../Notification/Notification";
 import Presence from "../Presence/Presence";
 import Toolbar from "../Toolbar/Toolbar";
-import { BOARD_ID, useSocket } from "../../hooks/useSocket";
+import { useSocket } from "../../hooks/useSocket";
 import { usePresence } from "../../hooks/usePresence";
 import type {
   BoardJoinedPayload,
@@ -12,6 +13,7 @@ import type {
   CursorUpdatePayload,
   DrawableTool,
   Point,
+  RoomEndedPayload,
   Tool,
   Viewport,
 } from "../../types/collaboration";
@@ -35,6 +37,10 @@ const isDrawableTool = (tool: Tool): tool is DrawableTool =>
   tool !== "select" && tool !== "hand";
 
 const Whiteboard = () => {
+  const { roomId } = useParams<{ roomId: string }>();
+  const navigate = useNavigate();
+  const boardId = roomId ?? "";
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const viewportRef = useRef<Viewport>({ offsetX: 0, offsetY: 0, scale: 1 });
@@ -47,7 +53,7 @@ const Whiteboard = () => {
     null,
   );
 
-  const { socket, status } = useSocket();
+  const { socket, status, isHost, hostSocketId } = useSocket(boardId);
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [brushWidth, setBrushWidth] = useState(DEFAULT_BRUSH_WIDTH);
   const [activeTool, setActiveTool] = useState<Tool>("pen");
@@ -66,7 +72,7 @@ const Whiteboard = () => {
     emitDrawingStop,
   } = usePresence({
     socket,
-    boardId: BOARD_ID,
+    boardId,
   });
 
   const isUserDrawing = (socketId: string) =>
@@ -265,6 +271,27 @@ const Whiteboard = () => {
   }, [selectedShapeId, socket]);
 
   useEffect(() => {
+    if (!boardId) return;
+
+    const handleRoomEnded = (payload: RoomEndedPayload) => {
+      if (payload.boardId !== boardId) return;
+      console.log("Room ended by host");
+      navigate("/");
+    };
+
+    socket.on("room:ended", handleRoomEnded);
+
+    return () => {
+      socket.off("room:ended", handleRoomEnded);
+    };
+  }, [socket, boardId, navigate]);
+
+  const handleEndRoom = () => {
+    if (!boardId || !isHost) return;
+    socket.emit("room:end", { boardId });
+  };
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!selectedShapeId || (event.key !== "Backspace" && event.key !== "Delete")) {
         return;
@@ -273,7 +300,7 @@ const Whiteboard = () => {
       event.preventDefault();
       removeShape(selectedShapeId);
       socket.emit("shape:delete", {
-        boardId: BOARD_ID,
+        boardId: boardId,
         shapeId: selectedShapeId,
       });
       setSelectedShapeId(null);
@@ -285,7 +312,7 @@ const Whiteboard = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedShapeId, socket]);
+  }, [selectedShapeId, socket, boardId]);
 
   const startPanning = (point: Point) => {
     isPanningRef.current = true;
@@ -343,7 +370,7 @@ const Whiteboard = () => {
 
       draftShapeRef.current = shape;
       socket.emit("shape:create", {
-        boardId: BOARD_ID,
+        boardId: boardId,
         shape,
       });
       renderCanvas();
@@ -390,7 +417,7 @@ const Whiteboard = () => {
 
       draftShapeRef.current = nextShape;
       socket.emit("shape:update", {
-        boardId: BOARD_ID,
+        boardId: boardId,
         shape: nextShape,
       });
       renderCanvas();
@@ -432,13 +459,13 @@ const Whiteboard = () => {
 
     if (draftShape.type !== "pen") {
       socket.emit("shape:create", {
-        boardId: BOARD_ID,
+        boardId: boardId,
         shape: draftShape,
       });
       setSelectedShapeId(draftShape.id);
     } else {
       socket.emit("shape:update", {
-        boardId: BOARD_ID,
+        boardId: boardId,
         shape: draftShape,
       });
     }
@@ -458,7 +485,7 @@ const Whiteboard = () => {
   const handleClearBoard = () => {
     clearBoardLocally();
     socket.emit("board:clear", {
-      boardId: BOARD_ID,
+      boardId: boardId,
     });
   };
 
@@ -496,16 +523,21 @@ const Whiteboard = () => {
     });
   }, [cursors, viewportVersion]);
 
+  if (!roomId) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <div className="whiteboard-page">
       <Toolbar
         color={color}
         brushWidth={brushWidth}
-        boardId={BOARD_ID}
+        boardId={boardId}
         connectionStatus={status}
         activeTool={activeTool}
         showGrid={showGrid}
         zoomPercent={zoomPercent}
+        isHost={isHost}
         onColorChange={setColor}
         onBrushWidthChange={setBrushWidth}
         onClear={handleClearBoard}
@@ -514,8 +546,9 @@ const Whiteboard = () => {
         onZoomOut={handleZoomOut}
         onResetView={handleResetView}
         onToggleGrid={() => setShowGrid((current) => !current)}
+        onEndRoom={handleEndRoom}
       />
-      <Presence users={users} boardId={BOARD_ID} />
+      <Presence users={users} boardId={boardId} hostSocketId={hostSocketId} />
       <div className="whiteboard-cursors">
         {remoteCursors.map((cursor) => (
           <Cursor

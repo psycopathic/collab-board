@@ -58,6 +58,10 @@ class BoardService {
   clearBoard(boardId: string) {
     this.boards.set(boardId, []);
   }
+
+  deleteBoard(boardId: string) {
+    this.boards.delete(boardId);
+  }
 }
 
 export const boardService = new BoardService();

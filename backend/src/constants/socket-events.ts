@@ -7,6 +7,11 @@ export const SOCKET_EVENTS = {
 
   BOARD_LEAVE: "board:leave",
 
+  ROOM_CREATE: "room:create",
+  ROOM_END: "room:end",
+  ROOM_ENDED: "room:ended",
+  HOST_CHANGED: "host:changed",
+
   BOARD_DRAW: "board:draw",
 
   BOARD_CLEAR: "board:clear",
