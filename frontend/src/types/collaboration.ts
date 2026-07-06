@@ -1,22 +1,28 @@
-export type Tool = "pen" | "rectangle" | "circle" | "line" | "arrow";
+export type Tool =
+  | "pen"
+  | "rectangle"
+  | "circle"
+  | "line"
+  | "arrow"
+  | "select"
+  | "hand";
+
+export type DrawableTool = Exclude<Tool, "select" | "hand">;
 
 export interface Point {
   x: number;
   y: number;
 }
 
-export interface DrawSegment {
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  color: string;
-  width: number;
+export interface Viewport {
+  offsetX: number;
+  offsetY: number;
+  scale: number;
 }
 
 interface ShapeBase {
   id: string;
-  type: Tool;
+  type: DrawableTool;
   strokeColor: string;
   strokeWidth: number;
 }
@@ -57,25 +63,51 @@ export interface ArrowShape extends ShapeBase {
   y2: number;
 }
 
-export type BoardShape =
+export type CanvasShape =
   | StrokeShape
   | RectangleShape
   | CircleShape
   | LineShape
   | ArrowShape;
 
-export interface DrawSegmentPayload {
-  boardId: string;
-  shapeId?: string;
-  segment: DrawSegment;
-}
-
 export interface ShapePayload {
   boardId: string;
-  shape: BoardShape;
+  shape: CanvasShape;
 }
 
 export interface ShapeDeletePayload {
   boardId: string;
   shapeId: string;
 }
+
+export interface BoardJoinedPayload {
+  boardId: string;
+  shapes?: CanvasShape[];
+}
+
+export interface PresenceUser {
+  socketId: string;
+  name: string;
+  boardId: string;
+}
+
+export interface PresenceUpdatePayload {
+  boardId: string;
+  users: PresenceUser[];
+}
+
+export interface CursorUpdatePayload extends PresenceUser {
+  x: number;
+  y: number;
+}
+
+export interface DrawingUpdatePayload extends PresenceUser {
+  isDrawing: boolean;
+}
+
+export interface UserNotification {
+  id: string;
+  message: string;
+}
+
+export type ConnectionStatus = "connected" | "reconnecting" | "disconnected";

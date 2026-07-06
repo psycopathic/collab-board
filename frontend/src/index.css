@@ -1,0 +1,50 @@
+:root {
+  --toolbar-height: 88px;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #cbd5e1;
+  color: #0f172a;
+  user-select: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.whiteboard-page {
+  min-height: 100vh;
+  background: #cbd5e1;
+  overflow: hidden;
+}
+
+.whiteboard-cursors {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.whiteboard-canvas {
+  display: block;
+  width: 100vw;
+  height: calc(100vh - var(--toolbar-height));
+  margin-top: var(--toolbar-height);
+  background: #ffffff;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --toolbar-height: 145px;
+  }
+}

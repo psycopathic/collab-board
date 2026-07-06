@@ -16,4 +16,19 @@ export const SOCKET_EVENTS = {
   USER_JOINED: "board:user-joined",
 
   USER_LEFT: "board:user-left",
+
+  CURSOR_MOVE: "cursor:move",
+  CURSOR_UPDATE: "cursor:update",
+
+  DRAWING_START: "drawing:start",
+  DRAWING_STOP: "drawing:stop",
+  DRAWING_UPDATE: "drawing:update",
+
+  PRESENCE_UPDATE: "presence:update",
+  USER_PRESENCE_JOINED: "user:joined",
+  USER_PRESENCE_LEFT: "user:left",
+
+  SHAPE_CREATE: "shape:create",
+  SHAPE_UPDATE: "shape:update",
+  SHAPE_DELETE: "shape:delete",
 } as const;

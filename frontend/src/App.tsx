@@ -1,11 +1,7 @@
+import Whiteboard from "./components/Whiteboard/Whiteboard";
 
 function App() {
-
-  return (
-    <>
-      <h2>Collab Board</h2>
-    </>
-  )
+  return <Whiteboard />;
 }
 
-export default App
+export default App;

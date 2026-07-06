@@ -1,0 +1,59 @@
+.presence-panel {
+  position: fixed;
+  top: calc(var(--toolbar-height) + 20px);
+  left: 20px;
+  z-index: 9;
+  min-width: 220px;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.presence-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.presence-panel__title {
+  font-weight: 700;
+}
+
+.presence-panel__board {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.presence-panel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.presence-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.presence-panel__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #22c55e;
+}
+
+@media (max-width: 900px) {
+  .presence-panel {
+    left: 12px;
+    right: 12px;
+    min-width: 0;
+  }
+}
