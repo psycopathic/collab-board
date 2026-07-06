@@ -1,0 +1,147 @@
+.toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: 1.7fr 1.1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1.2rem;
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.toolbar__section {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.toolbar__section--meta {
+  justify-content: flex-end;
+}
+
+.toolbar__toolset {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.toolbar__tool,
+.toolbar__control,
+.toolbar__clear {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.85rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.toolbar__tool--active,
+.toolbar__control--active {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  border-color: transparent;
+}
+
+.toolbar__clear {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 700;
+}
+
+.toolbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.toolbar__field--slider {
+  min-width: 180px;
+}
+
+.toolbar__label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.toolbar__color {
+  width: 2.9rem;
+  height: 2.3rem;
+  padding: 0.15rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 0.75rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.toolbar__slider {
+  width: 100%;
+  accent-color: #38bdf8;
+}
+
+.toolbar__value,
+.toolbar__text,
+.toolbar__status,
+.toolbar__zoom-value {
+  font-size: 0.92rem;
+}
+
+.toolbar__zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.toolbar__zoom-value {
+  min-width: 4rem;
+  text-align: center;
+}
+
+.toolbar__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.toolbar__status--connected {
+  color: #4ade80;
+}
+
+.toolbar__status--connected::before {
+  content: "\1F7E2";
+}
+
+.toolbar__status--reconnecting {
+  color: #fbbf24;
+}
+
+.toolbar__status--reconnecting::before {
+  content: "\1F7E1";
+}
+
+.toolbar__status--disconnected {
+  color: #f87171;
+}
+
+.toolbar__status--disconnected::before {
+  content: "\1F534";
+}
+
+@media (max-width: 1200px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar__section--meta {
+    justify-content: flex-start;
+  }
+}

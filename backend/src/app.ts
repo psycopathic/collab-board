@@ -1,10 +1,15 @@
 import express from "express";
 import cors from "cors";
 
+const allowedOrigins = [
+  ...(process.env.CLIENT_URL?.split(",") ?? []),
+  /^http:\/\/localhost:\d+$/,
+  /^http:\/\/127\.0\.0\.1:\d+$/,
+];
 
 const app = express();
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json());

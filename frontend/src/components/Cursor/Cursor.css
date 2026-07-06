@@ -1,0 +1,32 @@
+.remote-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 8;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 70ms linear;
+}
+
+.remote-cursor__label,
+.remote-cursor__drawing {
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #f8fafc;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.remote-cursor__icon {
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.remote-cursor__drawing {
+  margin-top: 0.2rem;
+  background: rgba(249, 115, 22, 0.92);
+}
