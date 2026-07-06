@@ -5,9 +5,10 @@ import type { PresenceUser } from "../../types/collaboration";
 interface PresenceProps {
   users: PresenceUser[];
   boardId: string;
+  hostSocketId?: string | null;
 }
 
-const Presence = ({ users, boardId }: PresenceProps) => {
+const Presence = ({ users, boardId, hostSocketId }: PresenceProps) => {
   return (
     <aside className="presence-panel">
       <div className="presence-panel__header">
@@ -20,6 +21,9 @@ const Presence = ({ users, boardId }: PresenceProps) => {
           <li className="presence-panel__item" key={user.socketId}>
             <span className="presence-panel__dot" />
             <span>{user.name}</span>
+            {user.socketId === hostSocketId && (
+              <span className="presence-panel__host-badge">Host</span>
+            )}
           </li>
         ))}
       </ul>

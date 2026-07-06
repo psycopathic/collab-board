@@ -83,6 +83,19 @@ export interface ShapeDeletePayload {
 export interface BoardJoinedPayload {
   boardId: string;
   shapes?: CanvasShape[];
+  isHost?: boolean;
+  hostSocketId?: string;
+}
+
+export interface HostChangedPayload {
+  boardId: string;
+  hostSocketId: string;
+  hostName: string;
+}
+
+export interface RoomEndedPayload {
+  boardId: string;
+  bySocketId: string;
 }
 
 export interface PresenceUser {

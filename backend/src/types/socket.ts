@@ -3,6 +3,27 @@ export interface JoinBoardPayload {
   name?: string;
 }
 
+export interface BoardJoinedPayload {
+  boardId: string;
+  isHost: boolean;
+  hostSocketId: string;
+}
+
+export interface HostChangedPayload {
+  boardId: string;
+  hostSocketId: string;
+  hostName: string;
+}
+
+export interface RoomCreateAck {
+  roomId: string;
+}
+
+export interface RoomEndedPayload {
+  boardId: string;
+  bySocketId: string;
+}
+
 export interface ClearBoardPayload {
   boardId: string;
 }

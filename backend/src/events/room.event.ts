@@ -3,9 +3,28 @@ import { Socket } from "socket.io";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { boardService } from "../services/board.services.js";
 import { presenceService } from "../services/presence.service.js";
-import { JoinBoardPayload, PresenceUpdatePayload } from "../types/socket.js";
+import type {
+  JoinBoardPayload,
+  PresenceUpdatePayload,
+  RoomCreateAck,
+  RoomEndedPayload,
+} from "../types/socket.js";
+import { generateRoomId } from "../utils/roomId.js";
 
 export const registerRoomEvents = (socket: Socket) => {
+  socket.on(SOCKET_EVENTS.ROOM_CREATE, (ack: (response: RoomCreateAck) => void) => {
+    if (typeof ack !== "function") {
+      socket.emit(SOCKET_EVENTS.BOARD_ERROR, {
+        message: "Missing ack callback for room:create.",
+      });
+      return;
+    }
+
+    const roomId = generateRoomId();
+    ack({ roomId });
+    console.log(`Room created: ${roomId} by ${socket.id}`);
+  });
+
   socket.on(SOCKET_EVENTS.BOARD_JOIN, ({ boardId, name }: JoinBoardPayload) => {
     if (!boardId || boardId.trim() === "") {
       socket.emit(SOCKET_EVENTS.BOARD_ERROR, {
@@ -39,9 +58,13 @@ export const registerRoomEvents = (socket: Socket) => {
 
     console.log(`${socket.id} joined ${boardId} as ${displayName}`);
 
+    const hostSocketId = presenceService.getHost(boardId) ?? socket.id;
+
     socket.emit(SOCKET_EVENTS.BOARD_JOINED, {
       boardId,
       shapes: boardService.getBoard(boardId),
+      isHost: presenceService.isHost(socket.id, boardId),
+      hostSocketId,
     });
 
     const presencePayload: PresenceUpdatePayload = {
@@ -54,5 +77,36 @@ export const registerRoomEvents = (socket: Socket) => {
     socket.to(boardId).emit(SOCKET_EVENTS.USER_JOINED, {
       socketId: socket.id,
     });
+  });
+
+  socket.on(SOCKET_EVENTS.ROOM_END, ({ boardId }: { boardId: string }) => {
+    if (!boardId || boardId.trim() === "") {
+      socket.emit(SOCKET_EVENTS.BOARD_ERROR, {
+        message: "Invalid board ID.",
+      });
+      return;
+    }
+
+    if (!presenceService.isHost(socket.id, boardId)) {
+      socket.emit(SOCKET_EVENTS.BOARD_ERROR, {
+        message: "Only the host can end the room.",
+      });
+      return;
+    }
+
+    const payload: RoomEndedPayload = {
+      boardId,
+      bySocketId: socket.id,
+    };
+
+    socket.nsp.to(boardId).emit(SOCKET_EVENTS.ROOM_ENDED, payload);
+
+    presenceService.endBoard(boardId);
+    boardService.deleteBoard(boardId);
+
+    console.log(`Room ended: ${boardId} by ${socket.id}`);
+
+    socket.nsp.in(boardId).socketsLeave(boardId);
+    socket.nsp.in(boardId).disconnectSockets(true);
   });
 };
